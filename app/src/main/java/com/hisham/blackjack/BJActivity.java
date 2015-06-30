@@ -1326,6 +1326,7 @@ public class BJActivity extends Activity implements OnClickListener,
 	}
 	@Override
 	public void onBackPressed() {
+		super.onBackPressed();
 		// if drawer is closed, close the app and show the ad
 				try {
 //					if(isAirpushAdAvailable){
