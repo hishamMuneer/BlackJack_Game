@@ -1,2 +1,2 @@
-# BlackJack_Game
+# BlackJack Game
 A simple Black Jack game running on Google Play
