@@ -1,16 +1,18 @@
 package com.hisham.blackjack;
 
+import java.util.Date;
+
 public class ScoreModel {
 	
 	String name;
 	int score;
-	String date;
+	Date date;
 	
 	public ScoreModel() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public ScoreModel(String name, int score, String date) {
+	public ScoreModel(String name, int score, Date date) {
 		super();
 		this.name = name;
 		this.score = score;
@@ -33,11 +35,11 @@ public class ScoreModel {
 		this.score = score;
 	}
 
-	public String getDate() {
+	public Date getDate() {
 		return date;
 	}
 
-	public void setDate(String date) {
+	public void setDate(Date date) {
 		this.date = date;
 	}
 	

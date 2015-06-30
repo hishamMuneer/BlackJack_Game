@@ -32,7 +32,12 @@ public class DateConversion {
 			return "Invalid date";
 		}
 	}
-	
+
+	// get date - example 20 min ago
+	public String getDate(Date created) {
+		String result = (String) DateUtils.getRelativeTimeSpanString(created.getTime(), new Date().getTime(), DateUtils.SECOND_IN_MILLIS);
+		return result;
+	}
 	// example - 2014-01-12 14:25:50
 	public String getSQLDate(long timestamp)
 	{

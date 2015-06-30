@@ -12,6 +12,7 @@ import java.util.Random;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -40,6 +41,9 @@ import android.widget.ViewSwitcher.ViewFactory;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.SaveCallback;
 
 public class BJActivity extends Activity implements OnClickListener,
 		OnSeekBarChangeListener, ViewFactory {
@@ -464,15 +468,27 @@ public class BJActivity extends Activity implements OnClickListener,
 											return;
 										}
 
-										Intent intent = new Intent(
-												BJActivity.this,
-												CheckScoresActivity.class);
-										intent.putExtra("extra_name",
-												etNameShare.getText()
-														.toString());
-										intent.putExtra("extra_score",
-												_highestScore+"");
-										startActivity(intent);
+										// TODO set score here show dialog here. Hide in call back.
+										final ProgressDialog progressDialog;
+										progressDialog = new ProgressDialog(BJActivity.this);
+										progressDialog.setMessage("Sharing your awesome score., Please wait...");
+										progressDialog.setCancelable(false);
+										progressDialog.show();
+
+										ParseObject gameScore = new ParseObject("HighScores");
+										gameScore.put("Name", etNameShare.getText().toString());
+										gameScore.put("Score", _highestScore);
+										gameScore.saveInBackground(new SaveCallback() {
+											@Override
+											public void done(ParseException e) {
+												progressDialog.setCancelable(true);
+												progressDialog.dismiss();
+												if(e == null){
+													Intent intent = new Intent(BJActivity.this,CheckScoresActivity.class);
+													startActivity(intent);
+												}
+											}
+										});
 
 									}
 								})
@@ -1331,7 +1347,7 @@ public class BJActivity extends Activity implements OnClickListener,
 //        }
 //
 //        public void onSmartWallAdShowing() {
-//        // This will be called by SDK when it’s showing any of the SmartWall ad.
+//        // This will be called by SDK when it's showing any of the SmartWall ad.
 //        }
 //
 //        public void onSmartWallAdClosed() {

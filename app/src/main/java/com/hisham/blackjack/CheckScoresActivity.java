@@ -36,203 +36,237 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parse.FindCallback;
+import com.parse.GetCallback;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+
 public class CheckScoresActivity extends Activity {
 
-	ArrayList<ScoreModel> items = new ArrayList<ScoreModel>();
-	ListView lvScores;
-	ScoreListAdapter adapter;
+    ArrayList<ScoreModel> items = new ArrayList<ScoreModel>();
+    ListView lvScores;
+    ScoreListAdapter adapter;
+    private ProgressDialog dialog;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_check_scores);
-		lvScores = (ListView)findViewById(R.id.listScores);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_check_scores);
+        lvScores = (ListView) findViewById(R.id.listScores);
 
-		adapter = new ScoreListAdapter(getApplicationContext(), R.layout.row, items);
-		lvScores.setAdapter(adapter);
-		
-		if(isOnline() == false){
-			Toast.makeText(CheckScoresActivity.this, "No Internet connection, Please try again later.", Toast.LENGTH_LONG).show();
-			return;
-		}
-		
-		
-		// if bundle is present upload the score else just fetch the score
+        adapter = new ScoreListAdapter(getApplicationContext(), R.layout.row, items);
+        lvScores.setAdapter(adapter);
 
-		Bundle bundle = getIntent().getExtras();
-		if (bundle != null) {
-			//	send score
-			new ScoresTask(getApplicationContext()).execute("insert", bundle.getString("extra_name"),bundle.getString("extra_score"));
-		}
-		// load data
-		new ScoresTask(getApplicationContext()).execute("get");
-		
-		// fetch the score and show
-		
-		// no Internet connection quit
-		
-		
-		
-	}
+        if (isOnline() == false) {
+            Toast.makeText(CheckScoresActivity.this, "No Internet connection, Please try again later.", Toast.LENGTH_LONG).show();
+            return;
+        }
 
-	// Custom Adapter
-		public class ScoreListAdapter extends ArrayAdapter<ScoreModel> {
 
-			private ArrayList<ScoreModel> tempItems;
+        // if bundle is present upload the score else just fetch the score
 
-			public ScoreListAdapter(Context context, int resource,
-					ArrayList<ScoreModel> items) {
-				super(context, resource, items);
-				tempItems = items;
-			}
+//		Bundle bundle = getIntent().getExtras();
+//		if (bundle != null) {
+        //	send score
+//			new ScoresTask(getApplicationContext()).execute("insert", bundle.getString("extra_name"),bundle.getString("extra_score"));
+//		}
+        // load data
+//		new ScoresTask(getApplicationContext()).execute("get");
 
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
 
-				View v = convertView;
-				Log.i("adapter", "getting a view");
-				if (v == null) {
-					LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-					v = vi.inflate(R.layout.row, null);
-				}
+        dialog = new ProgressDialog(CheckScoresActivity.this);
+        dialog.setMessage("Getting the best scores. Please wait...");
+        dialog.setCancelable(false);
+        dialog.show();
 
-				ScoreModel score = tempItems.get(position);
-				if (score != null) {
 
-					TextView tvName = (TextView) v
-							.findViewById(R.id.tvScoreName);
-					TextView tvScoreRank = (TextView) v.findViewById(R.id.tvScoreRank);
-					TextView tvScoreScore = (TextView) v.findViewById(R.id.tvScoreScore);
-					TextView tvDate = (TextView) v.findViewById(R.id.tvScoreDate);
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("HighScores");
+//		query.whereEqualTo("playerEmail", "dstemkoski@example.com");
+        query.addDescendingOrder("Score");
+//        query.setLimit(50);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, com.parse.ParseException e) {
+                dialog.setCancelable(true);
+                dialog.dismiss();
+                if (e == null) {
+                    items.clear();
+                    for (ParseObject object : list) {
+                        items.add(new ScoreModel(object.getString("Name"), object.getInt("Score"), object.getCreatedAt()));
+                    }
+                    adapter.notifyDataSetChanged();
+                    Log.d("score", "The getFirst request failed.");
+                } else {
+                    Log.d("score", "Retrieved the object.");
+                }
+            }
+        });
 
-					if (tvName != null) {
-						tvName.setText(score.getName());
-					}
-					if (tvScoreRank != null) {
-						tvScoreRank.setText("Rank: " + (position+1));
-					}
-					if (tvScoreScore != null) {
-						tvScoreScore.setText(score.getScore() + "");
-					}
-					if (tvDate != null) {
-						DateConversion cdts = new DateConversion();
-						tvDate.setText(cdts.getDate(score.getDate()));
-					}
-				}
 
-				return v;
+        // fetch the score and show
 
-			}
-		}
-		
-		
-		// Async task that calls web methods on server
-		class ScoresTask extends AsyncTask<String, Integer, String> {
-			private Context context;
-			ProgressDialog dialog;
+        // no Internet connection quit
 
-			public ScoresTask(Context cxt) {
-				context = cxt;
-				dialog = new ProgressDialog(CheckScoresActivity.this);
-			}
 
-			@Override
-			protected void onPreExecute() {
-					dialog.setMessage("Loading scores, Please wait");
-					dialog.show();
-	
-			}
+    }
 
-			@Override
-			protected String doInBackground(String... urls) {
-				String results;
-				try {
-					List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-					
-					
-					// checking which method is passed
-					if(urls[0].equals("insert")){
-						nameValuePairs.add(new BasicNameValuePair("name", urls[1]));
-						nameValuePairs.add(new BasicNameValuePair("score", urls[2]));
-					}else if(urls[0].equals("get")){
-					}else {
-						// invalid method is supplied
-						return "Your passed an invalid method.";
-					}
-					
-					
+    public boolean isOnline() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+            return true;
+        } else
+            return false;
+    }
 
-					nameValuePairs.add(new BasicNameValuePair("method",urls[0]));
 
-					// TODO goes here
-					URI u = new URI("http://microblogging.wingnity.com/BlackJack/scoresbj.php");
-					HttpClient httpclient = new DefaultHttpClient();
-					HttpPost httppost = new HttpPost(u);
-					httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-					HttpResponse response = httpclient.execute(httppost);
+    // Async task that calls web methods on server
+//		class ScoresTask extends AsyncTask<String, Integer, String> {
+//			private Context context;
+//			ProgressDialog dialog;
+//
+//			public ScoresTask(Context cxt) {
+//				context = cxt;
+//				dialog = new ProgressDialog(CheckScoresActivity.this);
+//			}
+//
+//			@Override
+//			protected void onPreExecute() {
+//					dialog.setMessage("Loading scores, Please wait");
+//					dialog.show();
+//
+//			}
+//
+//			@Override
+//			protected String doInBackground(String... urls) {
+//				String results;
+//				try {
+//					List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+//
+//
+//					// checking which method is passed
+//					if(urls[0].equals("insert")){
+//						nameValuePairs.add(new BasicNameValuePair("name", urls[1]));
+//						nameValuePairs.add(new BasicNameValuePair("score", urls[2]));
+//					}else if(urls[0].equals("get")){
+//					}else {
+//						// invalid method is supplied
+//						return "Your passed an invalid method.";
+//					}
+//
+//
+//
+//					nameValuePairs.add(new BasicNameValuePair("method",urls[0]));
+//
+//					// TODO goes here
+//					URI u = new URI("http://microblogging.wingnity.com/BlackJack/scoresbj.php");
+//					HttpClient httpclient = new DefaultHttpClient();
+//					HttpPost httppost = new HttpPost(u);
+//					httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+//					HttpResponse response = httpclient.execute(httppost);
+//
+//					// StatusLine stat = response.getStatusLine();
+//					int status = response.getStatusLine().getStatusCode();
+//
+//					if (status == 200) {
+//						HttpEntity entity = response.getEntity();
+//						String data = EntityUtils.toString(entity);
+//
+//						System.out.println("result is  " + data);
+//						Log.e("hisham", data);
+//
+//						JSONObject jsono = new JSONObject(data);
+//
+//						// If response from server for get method
+//						if (jsono.getInt("status") == 1 && urls[0].equals("get")) {
+//
+//							JSONArray jarray = jsono.getJSONArray("data");
+//
+//							for (int i = 0; i < jarray.length(); i++) {
+//
+//								JSONObject realobject = jarray.getJSONObject(i);
+//
+//								ScoreModel model = new ScoreModel();
+//
+//								model.setName(realobject.getString("name"));
+//								model.setScore(realobject.getInt("score"));
+//								model.setDate(realobject.getString("created"));
+//
+//								items.add(model);
+//							}
+//
+//							return "success";
+//						}
+//					}
+//				} catch (JSONException e1) {
+//				} catch (ParseException e1) {
+//					e1.printStackTrace();
+//				} catch (URISyntaxException e) {
+//					e.printStackTrace();
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//				return "";
+//			}
+//
+//			protected void onPostExecute(String r) {
+//				if(r.equals("success")){
+//					adapter.notifyDataSetChanged();
+//					dialog.dismiss();
+//				} else {
+//					dialog.dismiss();
+//				}
+//			}
+//		}
 
-					// StatusLine stat = response.getStatusLine();
-					int status = response.getStatusLine().getStatusCode();
+    // Custom Adapter
+    public class ScoreListAdapter extends ArrayAdapter<ScoreModel> {
 
-					if (status == 200) {
-						HttpEntity entity = response.getEntity();
-						String data = EntityUtils.toString(entity);
+        private ArrayList<ScoreModel> tempItems;
 
-						System.out.println("result is  " + data);
-						Log.e("hisham", data);
+        public ScoreListAdapter(Context context, int resource,
+                                ArrayList<ScoreModel> items) {
+            super(context, resource, items);
+            tempItems = items;
+        }
 
-						JSONObject jsono = new JSONObject(data);
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
 
-						// If response from server for get method
-						if (jsono.getInt("status") == 1 && urls[0].equals("get")) {
+            View v = convertView;
+            Log.i("adapter", "getting a view");
+            if (v == null) {
+                LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                v = vi.inflate(R.layout.row, null);
+            }
 
-							JSONArray jarray = jsono.getJSONArray("data"); 
-							
-							for (int i = 0; i < jarray.length(); i++) {
-								
-								JSONObject realobject = jarray.getJSONObject(i);
-								
-								ScoreModel model = new ScoreModel();
-								
-								model.setName(realobject.getString("name"));
-								model.setScore(realobject.getInt("score"));
-								model.setDate(realobject.getString("created"));
-								
-								items.add(model);
-							}
+            ScoreModel score = tempItems.get(position);
+            if (score != null) {
 
-							return "success";
-						}
-					}
-				} catch (JSONException e1) {
-				} catch (ParseException e1) {
-					e1.printStackTrace();
-				} catch (URISyntaxException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				return "";
-			}
+                TextView tvName = (TextView) v
+                        .findViewById(R.id.tvScoreName);
+                TextView tvScoreRank = (TextView) v.findViewById(R.id.tvScoreRank);
+                TextView tvScoreScore = (TextView) v.findViewById(R.id.tvScoreScore);
+                TextView tvDate = (TextView) v.findViewById(R.id.tvScoreDate);
 
-			protected void onPostExecute(String r) {
-				if(r.equals("success")){
-					adapter.notifyDataSetChanged();
-					dialog.dismiss();
-				} else {
-					dialog.dismiss();
-				}
-			}
-		}
+                if (tvName != null) {
+                    tvName.setText(score.getName());
+                }
+                if (tvScoreRank != null) {
+                    tvScoreRank.setText("Rank: " + (position + 1));
+                }
+                if (tvScoreScore != null) {
+                    tvScoreScore.setText(score.getScore() + "");
+                }
+                if (tvDate != null) {
+                    DateConversion cdts = new DateConversion();
+                    tvDate.setText(cdts.getDate(score.getDate()));
+                }
+            }
 
-		
-		public boolean isOnline() {
-			ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-			NetworkInfo netInfo = cm.getActiveNetworkInfo();
-			if (netInfo != null && netInfo.isConnectedOrConnecting()) {
-				return true;
-			} else
-				return false;
-		}
+            return v;
+
+        }
+    }
 
 }
