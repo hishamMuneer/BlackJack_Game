@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <EditTextPreference
+        android:key="pref_cb_name"
+        android:summary="Enter Your Name Here"
+        android:title="Your Name" />
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="pref_cb_sound"
+        android:summary="Game sounds"
+        android:title="Sound" />
+
+</PreferenceScreen>
