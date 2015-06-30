@@ -37,11 +37,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher.ViewFactory;
 
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.rdolsgkojj.hgdxmzwhci115179.AdListener;  //Add import statements
-import com.rdolsgkojj.hgdxmzwhci115179.MA;
-import com.rdolsgkojj.hgdxmzwhci115179.AdListener.AdType;
 
 public class BJActivity extends Activity implements OnClickListener,
 		OnSeekBarChangeListener, ViewFactory {
@@ -87,11 +85,11 @@ public class BJActivity extends Activity implements OnClickListener,
 	private final String saveFileName = "savingHighScoreOfBlackJack";
 
 	private AdView adView;
-	private MA ma; //Declare here Airpush ad
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		setContentView(R.layout.main);
 
 		// Setting up all variables here
@@ -129,10 +127,10 @@ public class BJActivity extends Activity implements OnClickListener,
 	
 	public void Ad() {
 
-		if(ma==null){
-			ma=new MA(this, adCallbackListener, true);
-			ma.callAppWall(); // only caching here, not showing ad
-		}
+//		if(ma==null){
+//			ma=new MA(this, adCallbackListener, true);
+//			ma.callAppWall(); // only caching here, not showing ad
+//		}
 		
 //		ma.callAppWall();
 //		ma.callLandingPageAd();
@@ -1314,42 +1312,42 @@ public class BJActivity extends Activity implements OnClickListener,
 	public void onBackPressed() {
 		// if drawer is closed, close the app and show the ad
 				try {
-					if(isAirpushAdAvailable){
-						Toast.makeText(getApplicationContext(), "Ad inbound! Ads help us earn a little otherwise we dont like them in our app. We hate ads too. :)", Toast.LENGTH_LONG).show();
-						ma.showCachedAd(this, AdType.appwall);
-					}
+//					if(isAirpushAdAvailable){
+//						Toast.makeText(getApplicationContext(), "Ad inbound! Ads help us earn a little otherwise we dont like them in our app. We hate ads too. :)", Toast.LENGTH_LONG).show();
+//						ma.showCachedAd(this, AdType.appwall);
+//					}
 				} catch (Exception e) {
 					finish();
 				}
 	};
 	
 	// Airpush ad listener
-		boolean isAirpushAdAvailable = false;
+//		boolean isAirpushAdAvailable = false;
 
-	AdListener adCallbackListener=new AdListener() {
-        
-        public void onSDKIntegrationError(String message) {
-        //Here you will receive message from SDK if it detects any integration issue.
-        }
-
-        public void onSmartWallAdShowing() {
-        // This will be called by SDK when it’s showing any of the SmartWall ad.
-        }
-
-        public void onSmartWallAdClosed() {
-        // This will be called by SDK when the SmartWall ad is closed.
-        }
-
-        public void onAdError(String message) {
-        //This will get called if any error occurred during ad serving.
-        }
-        public void onAdCached(AdType arg0) {
-		//This will get called when an ad is cached. 
-        	isAirpushAdAvailable = true;
-		}
-		 public void noAdAvailableListener() {
-		//this will get called when ad is not available
-		}
-     };
+//	AdListener adCallbackListener=new AdListener() {
+//
+//        public void onSDKIntegrationError(String message) {
+//        //Here you will receive message from SDK if it detects any integration issue.
+//        }
+//
+//        public void onSmartWallAdShowing() {
+//        // This will be called by SDK when it’s showing any of the SmartWall ad.
+//        }
+//
+//        public void onSmartWallAdClosed() {
+//        // This will be called by SDK when the SmartWall ad is closed.
+//        }
+//
+//        public void onAdError(String message) {
+//        //This will get called if any error occurred during ad serving.
+//        }
+//        public void onAdCached(AdType arg0) {
+//		//This will get called when an ad is cached.
+//        	isAirpushAdAvailable = true;
+//		}
+//		 public void noAdAvailableListener() {
+//		//this will get called when ad is not available
+//		}
+//     };
 	
 }

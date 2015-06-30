@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.hisham.blackjack"
-        minSdkVersion 8
+        minSdkVersion 11
         targetSdkVersion 22
 //        compileOptions {
 //            sourceCompatibility JavaVersion.VERSION_1_5
@@ -24,5 +24,7 @@ android {
 
 dependencies {
     compile 'com.google.android.gms:play-services:+'
+    compile 'com.parse.bolts:bolts-android:1.+'
+    compile fileTree(dir: 'libs', include: 'Parse-*.jar')
 
 }
