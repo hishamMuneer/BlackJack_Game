@@ -1,9 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'BlackJack'
+            storeFile file('E:/Hisham/keystore_hisham')
+        }
+    }
     compileSdkVersion 22
     buildToolsVersion "21.1.2"
-
     defaultConfig {
         applicationId "com.hisham.blackjack"
         minSdkVersion 11
@@ -12,19 +17,22 @@ android {
 //            sourceCompatibility JavaVersion.VERSION_1_5
 //            targetCompatibility JavaVersion.VERSION_1_5
 //        }
+        versionCode 13
+        versionName '3.0'
+        signingConfig signingConfigs.config
     }
-
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+    productFlavors {
+    }
 }
 
 dependencies {
     compile 'com.google.android.gms:play-services:+'
     compile 'com.parse.bolts:bolts-android:1.+'
-    compile fileTree(dir: 'libs', include: 'Parse-*.jar')
-
+    compile fileTree(include: 'Parse-*.jar', dir: 'libs')
 }
