@@ -13,10 +13,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -468,27 +470,7 @@ public class BJActivity extends Activity implements OnClickListener,
 											return;
 										}
 
-										// TODO set score here show dialog here. Hide in call back.
-										final ProgressDialog progressDialog;
-										progressDialog = new ProgressDialog(BJActivity.this);
-										progressDialog.setMessage("Sharing your awesome score., Please wait...");
-										progressDialog.setCancelable(false);
-										progressDialog.show();
-
-										ParseObject gameScore = new ParseObject("HighScores");
-										gameScore.put("Name", etNameShare.getText().toString());
-										gameScore.put("Score", _highestScore);
-										gameScore.saveInBackground(new SaveCallback() {
-											@Override
-											public void done(ParseException e) {
-												progressDialog.setCancelable(true);
-												progressDialog.dismiss();
-												if(e == null){
-													Intent intent = new Intent(BJActivity.this,CheckScoresActivity.class);
-													startActivity(intent);
-												}
-											}
-										});
+										shareScoreFirst(etNameShare.getText().toString().trim());
 
 									}
 								})
@@ -503,11 +485,8 @@ public class BJActivity extends Activity implements OnClickListener,
 				alerty.show();
 
 			} else {
-				Intent intentScores = new Intent(BJActivity.this,
-						CheckScoresActivity.class);
-				intentScores.putExtra("extra_name", userName);
-				intentScores.putExtra("extra_score", _highestScore);
-				startActivity(intentScores);
+				shareScoreFirst(userName);
+
 			}
 
 			// 2nd alert ends here
@@ -526,6 +505,31 @@ public class BJActivity extends Activity implements OnClickListener,
 		// showTextViews function
 		showTextViews();
 
+	}
+
+	private void shareScoreFirst(String userName) {
+		// TODO set score here show dialog here. Hide in call back.
+		final ProgressDialog progressDialog;
+		progressDialog = new ProgressDialog(BJActivity.this);
+		progressDialog.setMessage("Sharing your awesome score. Please wait...");
+		progressDialog.setCancelable(false);
+		progressDialog.show();
+
+		ParseObject gameScore = new ParseObject("HighScores");
+		gameScore.put("Name", userName);
+		gameScore.put("Score", _highestScore);
+		gameScore.put("Email", UserEmailFetcher.getEmail(getApplicationContext()));
+		gameScore.saveInBackground(new SaveCallback() {
+			@Override
+			public void done(ParseException e) {
+				progressDialog.setCancelable(true);
+				progressDialog.dismiss();
+				if(e == null){
+					Intent intent = new Intent(BJActivity.this,CheckScoresActivity.class);
+					startActivity(intent);
+				}
+			}
+		});
 	}
 
 	private void gameStart() {
@@ -1155,10 +1159,7 @@ public class BJActivity extends Activity implements OnClickListener,
 										            		   return;
 										            	   }
 										            	   
-										            	   Intent intent = new Intent(BJActivity.this, CheckScoresActivity.class);
-										            	   intent.putExtra("extra_name", etNameShare.getText().toString());
-										            	   intent.putExtra("extra_score", _highestScore);
-										            	   startActivity(intent);
+										            	   shareScoreFirst(etNameShare.getText().toString());
 										            	   
 										               }
 										           })
@@ -1171,10 +1172,7 @@ public class BJActivity extends Activity implements OnClickListener,
 										    alerty.show();
 
 									} else {
-										   Intent intent = new Intent(BJActivity.this, CheckScoresActivity.class);
-						            	   intent.putExtra("extra_name", userName);
-						            	   intent.putExtra("extra_score", _highestScore);
-						            	   startActivity(intent);
+										   shareScoreFirst(userName);
 									}
 									
 									
@@ -1252,6 +1250,17 @@ public class BJActivity extends Activity implements OnClickListener,
 		super.onOptionsItemSelected(item);
 
 		switch (item.getItemId()) {
+
+			case R.id.mIRate:
+				Uri uri = Uri.parse("market://details?id=" + getPackageName());
+				Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+				try {
+					startActivity(goToMarket);
+				} catch (ActivityNotFoundException e) {
+					startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=" + getPackageName())));
+				}
+				break;
+
 		case R.id.mISelectBackground:
 
 			Intent intent = new Intent(BJActivity.this,

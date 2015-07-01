@@ -90,9 +90,25 @@ public class CheckScoresActivity extends Activity {
                 dialog.setCancelable(true);
                 dialog.dismiss();
                 if (e == null) {
+                    // clearing items
                     items.clear();
+                    // parsing parse list
                     for (ParseObject object : list) {
-                        items.add(new ScoreModel(object.getString("Name"), object.getInt("Score"), object.getCreatedAt()));
+                        // as user can press share my score any number of times, we will get duplicate entries, so skipping
+                        // the item if name and score are duplicated.
+                        boolean duplicateEntry = false;
+                        long startTime = System.currentTimeMillis();
+                        for(int i=0; i<items.size(); i++){
+                            if(items.get(i).getName().equals(object.getString("Name")) && items.get(i).getScore() == object.getInt("Score")){
+                                duplicateEntry = true;
+                                break;
+                            }
+                        }
+                        long endTime = System.currentTimeMillis();
+                        Log.e("time","total time taken: " + (endTime - startTime));
+                        // only add if its a unique entry - PROBLEM is parse query don't give you unique values.
+                        if(!duplicateEntry)
+                            items.add(new ScoreModel(object.getString("Name"), object.getInt("Score"), object.getCreatedAt()));
                     }
                     adapter.notifyDataSetChanged();
                     Log.d("score", "The getFirst request failed.");
