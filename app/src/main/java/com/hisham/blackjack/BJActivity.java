@@ -363,18 +363,6 @@ public class BJActivity extends Activity implements OnClickListener,
 
     public void onClick(View v) {
 
-        // Making some sound here
-        {
-            SharedPreferences prefs = PreferenceManager
-                    .getDefaultSharedPreferences(getApplicationContext());
-            boolean gameSound = prefs.getBoolean("pref_cb_sound", true);
-            if (gameSound) {
-                mp = MediaPlayer
-                        .create(BJActivity.this, R.raw.btn_click);
-                mp.start();
-            }
-
-        }
         if (_playerCardNumber > 4 || _dealerCardNumber > 4) {
             return;
         }
