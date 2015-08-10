@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.ParseException;
@@ -32,6 +33,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -57,7 +59,7 @@ public class CheckScoresActivity extends Activity {
         adapter = new ScoreListAdapter(getApplicationContext(), R.layout.row, items);
         lvScores.setAdapter(adapter);
 
-        if (isOnline() == false) {
+        if (Globals.isOnline(this) == false) {
             Toast.makeText(CheckScoresActivity.this, "No Internet connection, Please try again later.", Toast.LENGTH_LONG).show();
             return;
         }
@@ -125,16 +127,6 @@ public class CheckScoresActivity extends Activity {
 
 
     }
-
-    public boolean isOnline() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
-            return true;
-        } else
-            return false;
-    }
-
 
     // Async task that calls web methods on server
 //		class ScoresTask extends AsyncTask<String, Integer, String> {
@@ -259,8 +251,8 @@ public class CheckScoresActivity extends Activity {
             ScoreModel score = tempItems.get(position);
             if (score != null) {
 
-                TextView tvName = (TextView) v
-                        .findViewById(R.id.tvScoreName);
+                ImageView imageRankIcon = (ImageView)v.findViewById(R.id.imageViewRank);
+                TextView tvName = (TextView) v.findViewById(R.id.tvScoreName);
                 TextView tvScoreRank = (TextView) v.findViewById(R.id.tvScoreRank);
                 TextView tvScoreScore = (TextView) v.findViewById(R.id.tvScoreScore);
                 TextView tvDate = (TextView) v.findViewById(R.id.tvScoreDate);
@@ -269,7 +261,30 @@ public class CheckScoresActivity extends Activity {
                     tvName.setText(score.getName());
                 }
                 if (tvScoreRank != null) {
-                    tvScoreRank.setText("Rank: " + (position + 1));
+                    int rank = position + 1;
+                    tvScoreRank.setText("Rank: " + rank);
+                    switch (rank){
+                        case 1:
+                            imageRankIcon.setImageResource(R.drawable.rank1);
+                            tvName.setTextSize(28);
+                            imageRankIcon.setVisibility(View.VISIBLE);
+                            break;
+                        case 2:
+                            imageRankIcon.setImageResource(R.drawable.rank2);
+                            tvName.setTextSize(24);
+                            imageRankIcon.setVisibility(View.VISIBLE);
+                            break;
+                        case 3:
+                            imageRankIcon.setImageResource(R.drawable.rank3);
+                            tvName.setTextSize(22);
+                            imageRankIcon.setVisibility(View.VISIBLE);
+                            break;
+                        default:
+                            tvName.setTextSize(20);
+                            imageRankIcon.setVisibility(View.GONE);
+                            break;
+
+                    }
                 }
                 if (tvScoreScore != null) {
                     tvScoreScore.setText(score.getScore() + "");

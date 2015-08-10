@@ -424,6 +424,11 @@ public class BJActivity extends Activity implements OnClickListener,
 
             case R.id.btnShare:
 
+                if (Globals.isOnline(this) == false) {
+                    Toast.makeText(getApplicationContext(), "No Internet connection!", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
                 // Another alert asking for name
                 SharedPreferences prefs = PreferenceManager
                         .getDefaultSharedPreferences(getApplicationContext());
@@ -1109,6 +1114,10 @@ public class BJActivity extends Activity implements OnClickListener,
 
                                     public void onClick(DialogInterface dialog,
                                                         int which) {
+                                        if (Globals.isOnline(getApplicationContext()) == false) {
+                                            Toast.makeText(getApplicationContext(), "No Internet connection!", Toast.LENGTH_LONG).show();
+                                            return;
+                                        }
 
                                         // Another alert asking for name
                                         SharedPreferences prefs = PreferenceManager
