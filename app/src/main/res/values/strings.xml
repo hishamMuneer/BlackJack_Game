@@ -23,9 +23,13 @@ Button Click -
 	Stand -  Means you stop at the current total.
 	Surrender - You will lose half money you bet in the hand.	
 	
-Enjoy the Game! - Developed by Hisham."</string>
+Enjoy the Game! - Developed by Hisham."
+</string>
     <string name="title_activity_check_scores" tools:ignore="MissingTranslation">Compare Scores</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+
+    <string name="ad_banner_id">ca-app-pub-1590664686760927/4019536697</string>
+    <string name="ad_fullscreen_id">ca-app-pub-1590664686760927/2542803491</string>
 
 </resources>
