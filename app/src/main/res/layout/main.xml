@@ -197,6 +197,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/llPlayControlsLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center" >
@@ -224,6 +225,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/llSharingOptionControls"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal" >

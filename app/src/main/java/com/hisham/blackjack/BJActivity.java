@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,6 +19,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -28,13 +30,13 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ViewSwitcher.ViewFactory;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
+import com.hisham.blackjack.utils.QuickToast;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.SaveCallback;
@@ -47,6 +49,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class BJActivity extends Activity implements OnClickListener,
         OnSeekBarChangeListener, ViewFactory {
@@ -69,6 +73,8 @@ public class BJActivity extends Activity implements OnClickListener,
     ImageSwitcher ivYourCard1, ivYourCard2, ivYourCard3, ivYourCard4,
             ivYourCard5;
     Button btnPlaceBet, btnExit, btnHelp, btnShare;
+
+    ViewGroup llPlayControlsLayout, llSharingOptionControls;
 
     // SoundPool soundPool = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
     Button btnHit, btnStand, btnSurrender;
@@ -94,10 +100,22 @@ public class BJActivity extends Activity implements OnClickListener,
      */
     private boolean isAdShown = false;
 
+    /**
+     * General class for toast messages
+     */
+    private QuickToast quickToast;
+    /**
+     * Hit button can't be clicked twice in one second
+     */
+    private long mLastClickTime;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        quickToast = new QuickToast(getApplicationContext(), QuickToast.ToastDuration.LONG);
+
         // Setting up all variables here
         setupVariables();
         tvHighestScore.setText("Highest : " + _highestScore);
@@ -146,7 +164,7 @@ public class BJActivity extends Activity implements OnClickListener,
     private void awardMoney() {
         Integer award = new Random().nextInt(500) + 500;
         _money = _money + award;
-        Toast.makeText(getApplicationContext(), "You got free " + award + " to play. Enjoy!", Toast.LENGTH_LONG).show();
+        quickToast.displayToastFromResource("Hurray!", "You got free " + award + " to play. Enjoy!");
     }
 
     private void requestNewInterstitial() {
@@ -250,6 +268,7 @@ public class BJActivity extends Activity implements OnClickListener,
         ivYourCard5.setImageResource(R.drawable.default_blue);
 
         btnPlaceBet.setVisibility(View.VISIBLE);
+        llSharingOptionControls.setVisibility(View.VISIBLE);
         hidePlayButtons();
         _dealerCardNumber = _playerCardNumber = 0;
         _dealerScore = _playerScore = 0;
@@ -320,6 +339,8 @@ public class BJActivity extends Activity implements OnClickListener,
     private void setupVariables() {
 
         layout = (RelativeLayout) findViewById(R.id.parentLayout);
+        llPlayControlsLayout = (ViewGroup)findViewById(R.id.llPlayControlsLayout);
+        llSharingOptionControls = (ViewGroup)findViewById(R.id.llSharingOptionControls);
 
         tvMoney = (TextView) findViewById(R.id.tvMoney);
         tvHighestScore = (TextView) findViewById(R.id.tvHighest);
@@ -377,10 +398,10 @@ public class BJActivity extends Activity implements OnClickListener,
 
                     showPlayButtons();
                     btnPlaceBet.setVisibility(View.INVISIBLE);
+                    llSharingOptionControls.setVisibility(View.INVISIBLE);
                     gameStart();
                 } else {
-                    Toast.makeText(BJActivity.this, "Bet Some Money First",
-                            Toast.LENGTH_SHORT).show();
+                    quickToast.displayToastFromResource("Hey!", "Bet Some Money First");
                 }
 
                 break;
@@ -388,6 +409,11 @@ public class BJActivity extends Activity implements OnClickListener,
             // Hit
             case R.id.btnHit:
 
+                // mis-clicking prevention, using threshold of 1000 ms
+                if (SystemClock.elapsedRealtime() - mLastClickTime < 1000){
+                    return;
+                }
+                mLastClickTime = SystemClock.elapsedRealtime();
                 btnHitClick();
                 break;
 
@@ -403,9 +429,7 @@ public class BJActivity extends Activity implements OnClickListener,
 
                 // Surrender
                 _money += _bet / 2;
-                Toast.makeText(BJActivity.this,
-                        "You Surrendered, You got half of your money back.",
-                        Toast.LENGTH_SHORT).show();
+                quickToast.displayToastFromResource("Ohh!", "You Surrendered, You got half of your money back.");
                 resetEveryThing();
                 alertBox();
                 break;
@@ -425,7 +449,7 @@ public class BJActivity extends Activity implements OnClickListener,
             case R.id.btnShare:
 
                 if (Globals.isOnline(this) == false) {
-                    Toast.makeText(getApplicationContext(), "No Internet connection!", Toast.LENGTH_LONG).show();
+                    quickToast.displayToastFromResource("Phew", "No Internet connection!");
                     return;
                 }
 
@@ -482,7 +506,6 @@ public class BJActivity extends Activity implements OnClickListener,
                 }
 
                 // 2nd alert ends here
-                //_money = 500;
                 resetEveryThing();
                 hidePlayButtons();
 
@@ -510,7 +533,8 @@ public class BJActivity extends Activity implements OnClickListener,
         ParseObject gameScore = new ParseObject("HighScores");
         gameScore.put("Name", userName);
         gameScore.put("Score", _highestScore);
-        gameScore.put("Email", UserEmailFetcher.getEmail(getApplicationContext()));
+        String email = UserEmailFetcher.getEmail(getApplicationContext());
+        gameScore.put("Email", (email == null) ? "No Email" : email);
         gameScore.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
@@ -863,8 +887,7 @@ public class BJActivity extends Activity implements OnClickListener,
 
     public void youLose() {
         _bet = 0;
-        Toast.makeText(BJActivity.this, "You Lose !!!",
-                Toast.LENGTH_LONG).show();
+        quickToast.displayToastFromResource("Hard Luck!", "You Lose !!!");
 
         // Making some sound here
         {
@@ -882,8 +905,7 @@ public class BJActivity extends Activity implements OnClickListener,
     public void youWon() {
         _money += _bet * 2;
         _bet = 0;
-        Toast.makeText(BJActivity.this, "You Won !!!",
-                Toast.LENGTH_SHORT).show();
+        quickToast.displayToastFromResource("Yeah!", "You Won !!!");
         // Making some sound here
         {
             SharedPreferences prefs = PreferenceManager
@@ -900,8 +922,7 @@ public class BJActivity extends Activity implements OnClickListener,
     public void blackJack() {
         _money += _bet * 3;
         _bet = 0;
-        Toast.makeText(BJActivity.this, "Congrats! You Hit BLACKJACK",
-                Toast.LENGTH_LONG).show();
+        quickToast.displayToastFromResource("Wow!", "Congrats! You Hit BLACKJACK");
         alertBox();
     }
 
@@ -949,9 +970,7 @@ public class BJActivity extends Activity implements OnClickListener,
             for (int i = 0; i < 5; i++) {
                 if (_playerCardArray[i] == 'A' && _playerScoreCount[i] == 11) {
                     _playerScoreCount[i] = 1;
-                    Toast.makeText(BJActivity.this,
-                            "Aces will be count as 1", Toast.LENGTH_LONG)
-                            .show();
+                    quickToast.displayToastFromResource("You are saved!", "Aces will be count as 1");
                     break;
                 }
             }
@@ -1032,9 +1051,7 @@ public class BJActivity extends Activity implements OnClickListener,
         } else {
             _money += _bet;
             _bet = 0;
-            Toast.makeText(BJActivity.this, "Game Drawn!!!",
-                    Toast.LENGTH_SHORT).show();
-
+            quickToast.displayToastFromResource("Well!", "Game Drawn!!!");
         }
     }
 
@@ -1103,6 +1120,7 @@ public class BJActivity extends Activity implements OnClickListener,
                                             mInterstitialAd.show();
                                             isAdShown = true;
                                         } else {
+                                            awardMoney();
                                             resetEveryThing();
                                             hidePlayButtons();
                                         }
@@ -1115,7 +1133,7 @@ public class BJActivity extends Activity implements OnClickListener,
                                     public void onClick(DialogInterface dialog,
                                                         int which) {
                                         if (Globals.isOnline(getApplicationContext()) == false) {
-                                            Toast.makeText(getApplicationContext(), "No Internet connection!", Toast.LENGTH_LONG).show();
+                                            quickToast.displayToastFromResource("Phew", "No Internet connection!");
                                             return;
                                         }
 
@@ -1160,10 +1178,9 @@ public class BJActivity extends Activity implements OnClickListener,
                                         }
 
 
-                                        // 2nd alert ends here
-                                        _money = 500;
-                                        resetEveryThing();
-                                        hidePlayButtons();
+//                                        // 2nd alert ends here
+//                                        resetEveryThing();
+//                                        hidePlayButtons();
                                     }
                                 });
 
