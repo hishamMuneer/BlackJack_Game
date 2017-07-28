@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    signingConfigs {
-        config {
-            keyAlias 'BlackJack'
-            storeFile file('E:/Hisham/keystore_hisham')
-        }
-    }
+//    signingConfigs {
+//        config {
+//            keyAlias 'BlackJack'
+//            storeFile file('E:/Hisham/keystore_hisham')
+//        }
+//    }
     compileSdkVersion 22
     buildToolsVersion "21.1.2"
     defaultConfig {
@@ -19,7 +19,7 @@ android {
 //        }
         versionCode 15
         versionName '3.2'
-        signingConfig signingConfigs.config
+//        signingConfig signingConfigs.config
     }
     buildTypes {
         release {
