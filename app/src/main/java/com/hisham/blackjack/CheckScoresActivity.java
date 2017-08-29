@@ -6,19 +6,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -37,11 +24,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.parse.FindCallback;
-import com.parse.GetCallback;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 
 public class CheckScoresActivity extends Activity {
 
@@ -81,44 +63,45 @@ public class CheckScoresActivity extends Activity {
         dialog.setCancelable(false);
         dialog.show();
 
+        // todo parse stuff
 
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("HighScores");
-//		query.whereEqualTo("playerEmail", "dstemkoski@example.com");
-        query.addDescendingOrder("Score");
-//        query.setLimit(50);
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, com.parse.ParseException e) {
-                dialog.setCancelable(true);
-                dialog.dismiss();
-                if (e == null) {
-                    // clearing items
-                    items.clear();
-                    // parsing parse list
-                    for (ParseObject object : list) {
-                        // as user can press share my score any number of times, we will get duplicate entries, so skipping
-                        // the item if name and score are duplicated.
-                        boolean duplicateEntry = false;
-                        long startTime = System.currentTimeMillis();
-                        for(int i=0; i<items.size(); i++){
-                            if(items.get(i).getName().equals(object.getString("Name")) && items.get(i).getScore() == object.getInt("Score")){
-                                duplicateEntry = true;
-                                break;
-                            }
-                        }
-                        long endTime = System.currentTimeMillis();
-                        Log.e("time","total time taken: " + (endTime - startTime));
-                        // only add if its a unique entry - PROBLEM is parse query don't give you unique values.
-                        if(!duplicateEntry)
-                            items.add(new ScoreModel(object.getString("Name"), object.getInt("Score"), object.getCreatedAt()));
-                    }
-                    adapter.notifyDataSetChanged();
-                    Log.d("score", "The getFirst request failed.");
-                } else {
-                    Log.d("score", "Retrieved the object.");
-                }
-            }
-        });
+//        ParseQuery<ParseObject> query = ParseQuery.getQuery("HighScores");
+////		query.whereEqualTo("playerEmail", "dstemkoski@example.com");
+//        query.addDescendingOrder("Score");
+////        query.setLimit(50);
+//        query.findInBackground(new FindCallback<ParseObject>() {
+//            @Override
+//            public void done(List<ParseObject> list, com.parse.ParseException e) {
+//                dialog.setCancelable(true);
+//                dialog.dismiss();
+//                if (e == null) {
+//                    // clearing items
+//                    items.clear();
+//                    // parsing parse list
+//                    for (ParseObject object : list) {
+//                        // as user can press share my score any number of times, we will get duplicate entries, so skipping
+//                        // the item if name and score are duplicated.
+//                        boolean duplicateEntry = false;
+//                        long startTime = System.currentTimeMillis();
+//                        for(int i=0; i<items.size(); i++){
+//                            if(items.get(i).getName().equals(object.getString("Name")) && items.get(i).getScore() == object.getInt("Score")){
+//                                duplicateEntry = true;
+//                                break;
+//                            }
+//                        }
+//                        long endTime = System.currentTimeMillis();
+//                        Log.e("time","total time taken: " + (endTime - startTime));
+//                        // only add if its a unique entry - PROBLEM is parse query don't give you unique values.
+//                        if(!duplicateEntry)
+//                            items.add(new ScoreModel(object.getString("Name"), object.getInt("Score"), object.getCreatedAt()));
+//                    }
+//                    adapter.notifyDataSetChanged();
+//                    Log.d("score", "The getFirst request failed.");
+//                } else {
+//                    Log.d("score", "Retrieved the object.");
+//                }
+//            }
+//        });
 
 
         // fetch the score and show

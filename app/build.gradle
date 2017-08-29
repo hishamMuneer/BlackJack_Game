@@ -7,11 +7,11 @@ android {
 //            storeFile file('E:/Hisham/keystore_hisham')
 //        }
 //    }
-    compileSdkVersion 22
-    buildToolsVersion "21.1.2"
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "com.hisham.blackjack"
-        minSdkVersion 11
+        minSdkVersion 14
         targetSdkVersion 22
 //        compileOptions {
 //            sourceCompatibility JavaVersion.VERSION_1_5

@@ -37,9 +37,6 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.hisham.blackjack.utils.QuickToast;
-import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.SaveCallback;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -530,22 +527,24 @@ public class BJActivity extends Activity implements OnClickListener,
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        ParseObject gameScore = new ParseObject("HighScores");
-        gameScore.put("Name", userName);
-        gameScore.put("Score", _highestScore);
-        String email = UserEmailFetcher.getEmail(getApplicationContext());
-        gameScore.put("Email", (email == null) ? "No Email" : email);
-        gameScore.saveInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                progressDialog.setCancelable(true);
-                progressDialog.dismiss();
-                if (e == null) {
-                    Intent intent = new Intent(BJActivity.this, CheckScoresActivity.class);
-                    startActivity(intent);
-                }
-            }
-        });
+//        ParseObject gameScore = new ParseObject("HighScores");
+//        gameScore.put("Name", userName);
+//        gameScore.put("Score", _highestScore);
+//        String email = UserEmailFetcher.getEmail(getApplicationContext());
+//        gameScore.put("Email", (email == null) ? "No Email" : email);
+//        gameScore.saveInBackground(new SaveCallback() {
+//            @Override
+//            public void done(ParseException e) {
+//                progressDialog.setCancelable(true);
+//                progressDialog.dismiss();
+//                if (e == null) {
+//                    Intent intent = new Intent(BJActivity.this, CheckScoresActivity.class);
+//                    startActivity(intent);
+//                }
+//            }
+//        });
+
+        // todo parse fix
     }
 
     private void gameStart() {
